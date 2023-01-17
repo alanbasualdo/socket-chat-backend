@@ -1,7 +1,7 @@
 const { response } = require("express");
 const Usuario = require('../models/usuario');
 const bcrypt = require('bcryptjs');
-const generarJWT = require("../helpers/jwt");
+const { generarJWT } = require("../helpers/jwt");
 
 const crearUsuario = async (req, res = response) => {
 
@@ -11,7 +11,7 @@ const crearUsuario = async (req, res = response) => {
         if (existeEmail) {
             return res.status(400).json({
                 ok: false,
-                msg: 'El correo ya existe'
+                msg: 'El correo ya existe.'
             })
         }
         const usuario = new Usuario({ name, email, password })
@@ -38,25 +38,25 @@ const login = async (req, res = response) => {
 
     try {
         const { email, password } = req.body;
-        const usuarioDB = await Usuario.findOne({ email });
-        if (!usuarioDB) {
+        const usuario = await Usuario.findOne({ email });
+        if (!usuario) {
             return res.status(404).json({
                 ok: false,
                 msg: 'No existe email'
             })
         };
-        const validPassword = bcrypt.compareSync(password, usuarioDB.password);
+        const validPassword = bcrypt.compareSync(password, usuario.password);
         if (!validPassword) {
             return res.status(404).json({
                 ok: false,
                 msg: 'Contraseña incorrecta'
             })
         };
-        const token = await generarJWT(usuarioDB.id);
+        const token = await generarJWT(usuario.id);
 
         res.json({
             ok: true,
-            usuarioDB,
+            usuario,
             token
         })
     } catch (error) {
